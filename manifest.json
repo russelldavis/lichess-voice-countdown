@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "Lichess Voice Countdown",
+  "version": "0.1",
+  "permissions": [],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://lichess.org/*"
+      ],
+      "js": ["content.js"]
+    }
+  ]
+}
