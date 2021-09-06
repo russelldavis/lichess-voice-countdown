@@ -17,6 +17,13 @@ function debounce(callback, time) {
   };
 }
 
+async function playVoice() {
+  const opts = await getStorage(DEFAULT_OPTIONS);
+  const utterance = new SpeechSynthesisUtterance(opts.alertTimes[0] || 0);
+  utterance.voice = await selectedVoice();
+  speechSynthesis.speak(utterance);
+}
+
 function getVoices() {
   return new Promise((resolve, _reject) => {
     const voices = speechSynthesis.getVoices();
@@ -47,6 +54,7 @@ async function initVoices() {
 
 async function saveVoice() {
   await setStorage({ voiceName: (await selectedVoice()).name });
+  await playVoice();
 }
 
 async function init() {

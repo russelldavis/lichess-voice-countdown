@@ -3,10 +3,16 @@
 <head>
   <title>Lichess Voice Countdown Options</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       padding: 0px 25px;
       font-size: 14px;
       max-width: 420px;
+    }
+    textarea, input, button, select {
+      font-size: inherit;
     }
     h1 {
       font-size: 22px;
@@ -20,7 +26,16 @@
       background-color: #fbb;
     }
     #resetToDefaults {
+      margin-top: 20px;
       padding: 4px 14px;
+    }
+    select {
+      width: 100%;
+      margin: 5px 0;
+      display: block;
+      padding: 3px 2px;
+    }
+    textarea {
     }
   </style>
 </head>
@@ -32,6 +47,9 @@
   Alert times (in seconds), separated by commas:
 </label>
 <textarea id="alertsText"></textarea>
+<label for="voice">
+  Voice:
+</label>
 <select id="voice"></select>
 <button id="resetToDefaults" type="button">Reset to defaults</button>
 
