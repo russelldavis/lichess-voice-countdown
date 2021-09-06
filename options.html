@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lichess Voice Countdown Options</title>
+  <style>
+    body {
+      padding: 0px 25px;
+      font-size: 14px;
+      max-width: 420px;
+    }
+    h1 {
+      font-size: 22px;
+    }
+    #alertsText {
+      margin: 5px 0;
+      width: 100%;
+      height: 48px;
+    }
+    :invalid {
+      background-color: #fbb;
+    }
+    #resetToDefaults {
+      padding: 4px 14px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Lichess Voice Countdown Options</h1>
+
+<label for="alertsText">
+  Alert times (in seconds), separated by commas:
+</label>
+<textarea id="alertsText"></textarea>
+<button id="resetToDefaults" type="button">Reset to defaults</button>
+
+<script src="options.js" type="module"></script>
+</body>
+</html>
