@@ -1,6 +1,8 @@
 const $ = document.querySelector.bind(document);
+const voicesPromise = getVoices();
 const DEFAULT_OPTIONS = {
   alertTimes: [45, 30, 15, 10, 5, 2],
+  voiceName: null,
 }
 
 
@@ -15,13 +17,47 @@ function debounce(callback, time) {
   };
 }
 
-function init() {
-  document.addEventListener('DOMContentLoaded', restoreOptions);
+function getVoices() {
+  return new Promise((resolve, _reject) => {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length !== 0) {
+      resolve(voices);
+    } else {
+      const listener = () => {
+        speechSynthesis.removeEventListener("voiceschanged", listener);
+        resolve(speechSynthesis.getVoices());
+      };
+      speechSynthesis.addEventListener("voiceschanged", listener);
+    }
+  });
+}
+
+async function selectedVoice() {
+  return (await voicesPromise)[$("#voice").selectedIndex];
+}
+
+async function initVoices() {
+  const voiceEl = $("#voice");
+  for (const voice of await voicesPromise) {
+    const option = document.createElement('option');
+    option.textContent = `${voice.name} (${voice.lang})`;
+    voiceEl.appendChild(option);
+  }
+}
+
+async function saveVoice() {
+  await setStorage({ voiceName: (await selectedVoice()).name });
+}
+
+async function init() {
+  await initVoices();
+  await restoreOptions();
   $("#alertsText").addEventListener('input', debounce(saveAlertsText, 50));
+  $("#voice").addEventListener('change', saveVoice);
   $("#resetToDefaults").addEventListener('click', resetToDefaults);
 }
 
-function saveAlertsText(e) {
+async function saveAlertsText() {
   const el = $("#alertsText");
   const alertsText = $("#alertsText").value;
   const alertStrs = alertsText.split(",");
@@ -39,7 +75,7 @@ function saveAlertsText(e) {
     alertTimes.push(alertTime)
   }
   el.setCustomValidity("");
-  setStorage({alertTimes});
+  await setStorage({ alertTimes });
 }
 
 function getStorage(keysOrDefaults) {
@@ -68,7 +104,11 @@ function setStorage(items) {
 
 async function restoreOptions() {
   const opts = await getStorage(DEFAULT_OPTIONS);
+  const voices = await voicesPromise;
   $("#alertsText").value = opts.alertTimes.join(", ");
+  $("#voice").selectedIndex = opts.voiceName ?
+    voices.findIndex((voice) => voice.name === opts.voiceName) :
+    voices.findIndex((voice) => voice.default);
 }
 
 async function resetToDefaults() {
@@ -76,5 +116,5 @@ async function resetToDefaults() {
   await restoreOptions();
 }
 
-init();
+init().then();
 export {};
