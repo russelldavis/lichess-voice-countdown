@@ -1,50 +1,54 @@
-import { getOptions } from "./lib.js";
+import { getOptions, getVoices, speak, voicePredicate } from "./lib.js";
 const $ = document.querySelector.bind(document);
-let opts = null;
 
-function speak(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  console.log(`Speaking: ${text}`);
-  speechSynthesis.speak(utterance);
-}
-
-let prevSeconds = null;
-function onTimeMutation(timeStr) {
-  const match = timeStr.match(/(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/);
-  if (!match) {
-    console.log("Can't parse time:", timeStr);
-    return;
-  }
-  const seconds = (Number(match[1]) * 60) + Number(match[2]);
-  if (seconds === prevSeconds) {
-    // The clock was re-rendered w/ no change
-    return;
-  }
-  prevSeconds = seconds;
-  if (opts.alertTimes.includes(seconds)) {
-    speak(`${seconds}`);
-  }
-}
-
-function tryInit() {
-  const timeEl = $(".rclock-bottom .time");
-  if (!timeEl) {
-    return false;
+class Handler {
+  constructor(voice, extOpts) {
+    this.voice = voice;
+    this.extOpts = extOpts;
+    this.prevSeconds = null;
   }
 
-  console.log("Lichess Countdown Timer is activated")
-  new MutationObserver(() => {
-    onTimeMutation(timeEl.innerText);
-  }).observe(timeEl, {childList: true});
-  return true;
+  onTimeMutation(timeStr) {
+    const match = timeStr.match(/(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/);
+    if (!match) {
+      console.log("Can't parse time:", timeStr);
+      return;
+    }
+    const seconds = (Number(match[1]) * 60) + Number(match[2]);
+    if (seconds === this.prevSeconds) {
+      // The clock was re-rendered w/ no change
+      return;
+    }
+    this.prevSeconds = seconds;
+    if (this.extOpts.alertTimes.includes(seconds)) {
+      speak(`${seconds}`, this.voice);
+    }
+  }
+
+  tryInit() {
+    const timeEl = $(".rclock-bottom .time");
+    if (!timeEl) {
+      return false;
+    }
+
+    console.log("Lichess Countdown Timer is activated")
+    new MutationObserver(() => {
+      this.onTimeMutation(timeEl.innerText);
+    }).observe(timeEl, {childList: true});
+    return true;
+  }
 }
 
 async function main() {
   console.log("Lichess Countdown Timer is initializing");
-  opts = await getOptions();
-  if (!tryInit()) {
+  const extOpts = await getOptions();
+  const voices = await getVoices();
+  const voice = voices.find(voicePredicate(extOpts.voiceName));
+  const handler = new Handler(voice, extOpts);
+
+  if (!handler.tryInit()) {
     const observer = new MutationObserver(() => {
-      if (tryInit()) {
+      if (handler.tryInit()) {
         observer.disconnect();
       }
     });

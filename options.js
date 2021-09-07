@@ -1,7 +1,7 @@
 // References:
 // https://github.com/mdn/web-speech-api/tree/master/speak-easy-synthesis
 // https://mdn.github.io/web-speech-api/speak-easy-synthesis/
-import { DEFAULT_OPTIONS, getOptions } from "./lib.js";
+import { DEFAULT_OPTIONS, getOptions, getVoices, speak, voicePredicate } from "./lib.js";
 import { setStorage } from "./storage.js";
 
 const $ = document.querySelector.bind(document);
@@ -20,24 +20,8 @@ function debounce(callback, time) {
 
 async function playVoice() {
   const opts = await getOptions();
-  const utterance = new SpeechSynthesisUtterance(opts.alertTimes[0] || 0);
-  utterance.voice = await selectedVoice();
-  speechSynthesis.speak(utterance);
-}
-
-function getVoices() {
-  return new Promise((resolve, _reject) => {
-    const voices = speechSynthesis.getVoices();
-    if (voices.length !== 0) {
-      resolve(voices);
-    } else {
-      const listener = () => {
-        speechSynthesis.removeEventListener("voiceschanged", listener);
-        resolve(speechSynthesis.getVoices());
-      };
-      speechSynthesis.addEventListener("voiceschanged", listener);
-    }
-  });
+  const text = opts.alertTimes[0] || 0;
+  speak(text, await selectedVoice());
 }
 
 async function selectedVoice() {
@@ -91,9 +75,7 @@ async function restoreOptions() {
   const opts = await getOptions();
   const voices = await voicesPromise;
   $("#alertsText").value = opts.alertTimes.join(", ");
-  $("#voice").selectedIndex = opts.voiceName ?
-    voices.findIndex((voice) => voice.name === opts.voiceName) :
-    voices.findIndex((voice) => voice.default);
+  $("#voice").selectedIndex = voices.findIndex(voicePredicate(opts.voiceName));
 }
 
 async function resetToDefaults() {

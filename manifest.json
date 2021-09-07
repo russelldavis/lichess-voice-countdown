@@ -17,6 +17,7 @@
     "matches": ["https://lichess.org/*"],
     "resources": [
       "content.js",
+      "storage.js",
       "lib.js"
     ]
   }]
