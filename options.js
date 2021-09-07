@@ -1,10 +1,11 @@
+// References:
+// https://github.com/mdn/web-speech-api/tree/master/speak-easy-synthesis
+// https://mdn.github.io/web-speech-api/speak-easy-synthesis/
+import { DEFAULT_OPTIONS, getOptions } from "./lib.js";
+import { setStorage } from "./storage.js";
+
 const $ = document.querySelector.bind(document);
 const voicesPromise = getVoices();
-const DEFAULT_OPTIONS = {
-  alertTimes: [45, 30, 15, 10, 5, 2],
-  voiceName: null,
-}
-
 
 function debounce(callback, time) {
   let timeoutId = null;
@@ -18,7 +19,7 @@ function debounce(callback, time) {
 }
 
 async function playVoice() {
-  const opts = await getStorage(DEFAULT_OPTIONS);
+  const opts = await getOptions();
   const utterance = new SpeechSynthesisUtterance(opts.alertTimes[0] || 0);
   utterance.voice = await selectedVoice();
   speechSynthesis.speak(utterance);
@@ -86,32 +87,8 @@ async function saveAlertsText() {
   await setStorage({ alertTimes });
 }
 
-function getStorage(keysOrDefaults) {
-  return new Promise((resolve, _reject) => {
-    chrome.storage.sync.get(keysOrDefaults, (items) => {
-      if (chrome.runtime.lastError) {
-        alert(`Sorry, there was an error loading the options: ${chrome.runtime.lastError.message}`);
-      } else {
-        resolve(items);
-      }
-    });
-  });
-}
-
-function setStorage(items) {
-  return new Promise((resolve, _reject) => {
-    chrome.storage.sync.set(items, () => {
-      if (chrome.runtime.lastError) {
-        alert(`Sorry, there was an error saving the options: ${chrome.runtime.lastError.message}`);
-      } else {
-        resolve();
-      }
-    });
-  })
-}
-
 async function restoreOptions() {
-  const opts = await getStorage(DEFAULT_OPTIONS);
+  const opts = await getOptions();
   const voices = await voicesPromise;
   $("#alertsText").value = opts.alertTimes.join(", ");
   $("#voice").selectedIndex = opts.voiceName ?

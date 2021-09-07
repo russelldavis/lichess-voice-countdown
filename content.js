@@ -1,5 +1,6 @@
+import { getOptions } from "./lib.js";
 const $ = document.querySelector.bind(document);
-const alertTimes = [45, 30, 15, 10, 5, 2];
+let opts = null;
 
 function speak(text) {
   const utterance = new SpeechSynthesisUtterance(text);
@@ -20,30 +21,37 @@ function onTimeMutation(timeStr) {
     return;
   }
   prevSeconds = seconds;
-  if (alertTimes.includes(seconds)) {
+  if (opts.alertTimes.includes(seconds)) {
     speak(`${seconds}`);
   }
 }
 
-function onFirstRender() {
+function tryInit() {
   const timeEl = $(".rclock-bottom .time");
   if (!timeEl) {
-    console.log("No time element");
-    return;
+    return false;
   }
 
   console.log("Lichess Countdown Timer is activated")
   new MutationObserver(() => {
     onTimeMutation(timeEl.innerText);
   }).observe(timeEl, {childList: true});
+  return true;
 }
 
-function main() {
-  const observer = new MutationObserver(() => {
-    observer.disconnect();
-    onFirstRender();
-  });
-  observer.observe(document.body, {childList: true, subtree: true})
+async function main() {
+  console.log("Lichess Countdown Timer is initializing");
+  opts = await getOptions();
+  if (!tryInit()) {
+    const observer = new MutationObserver(() => {
+      if (tryInit()) {
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, {childList: true, subtree: true})
+  }
 }
 
-main();
+main().then();
+
+export {};
