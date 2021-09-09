@@ -15,8 +15,16 @@ class Handler {
       return;
     }
     const seconds = (Number(match[1]) * 60) + Number(match[2]);
+    if (this.prevSeconds == null) {
+      // It's the first render. If the starting time happens to fall on an alert marker,
+      // no need to alert at the start of the game. This also avoids alerting when loading
+      // an already finished game, if the ending time of the game happened to fall on an
+      // alert time.
+      this.prevSeconds = seconds;
+      return;
+    }
     if (seconds === this.prevSeconds) {
-      // The clock was re-rendered w/ no change
+      // The clock was re-rendered w/ no change, or the milliseconds changed but not the rest.
       return;
     }
     this.prevSeconds = seconds;
