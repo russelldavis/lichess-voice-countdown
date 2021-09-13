@@ -2,12 +2,21 @@ const $ = document.querySelector.bind(document);
 
 const OPTIONS = {
   alertTimes: [45, 30, 15, 10, 5, 2],
+  moveAlertInterval: 30,
   voiceName: "Alex",
+  // debug: true,
+}
+
+if (OPTIONS.debug) {
+  OPTIONS.alertTimes.push(59);
+  OPTIONS.moveAlertInterval = 3;
 }
 
 const voices = await getVoices();
 const voice = voices.find((voice) => voice.name === OPTIONS.voiceName);
 let prevSeconds = null;
+let prevNumMoves = null;
+let moveStartTime = null;
 
 function speak(text) {
   console.log(`Speaking: ${text}`);
@@ -32,7 +41,7 @@ function getVoices() {
 }
 
 
-function onTimeMutation(timeStr) {
+function onTimeMutation(movesEl, timeStr) {
   const match = timeStr.match(/(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/);
   if (!match) {
     console.log("Can't parse time:", timeStr);
@@ -54,18 +63,31 @@ function onTimeMutation(timeStr) {
   prevSeconds = seconds;
   if (OPTIONS.alertTimes.includes(seconds)) {
     speak(`${seconds}`);
+    return;
+  }
+
+  const numMoves = movesEl.querySelectorAll("u8t").length
+  if (numMoves !== prevNumMoves) {
+    prevNumMoves = numMoves;
+    // + 1 because the move started a second ago, beore the clock changed
+    moveStartTime = seconds + 1;
+  }
+
+  if ((moveStartTime - seconds) % OPTIONS.moveAlertInterval === 0) {
+    speak("move!");
   }
 }
 
 function tryInit() {
   const timeEl = $(".rclock-bottom .time");
-  if (!timeEl) {
+  const movesEl = $("rm6"); // lichess uses a weird custom tag
+  if (!timeEl || !movesEl) {
     return false;
   }
 
   console.log("Lichess Countdown Timer is activated")
   new MutationObserver(() => {
-    onTimeMutation(timeEl.innerText);
+    onTimeMutation(movesEl, timeEl.innerText);
   }).observe(timeEl, {childList: true});
   return true;
 }
