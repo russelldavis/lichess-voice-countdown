@@ -3,7 +3,7 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "module": "ES2020",
+    "module": "esnext",
     "target": "ES2019",
     "lib": [
         "ES2019",
