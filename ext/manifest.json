@@ -3,7 +3,7 @@
   "name": "Lichess Voice Countdown",
   "description": "Plays a voice countdown in Lichess when you're low on time",
   "version": "0.1",
-  "permissions": ["storage"],
+  "permissions": [],
   "icons": {
     "16": "images/icon-16.png",
     "48": "images/icon-48.png",

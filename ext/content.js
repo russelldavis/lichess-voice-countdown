@@ -19,6 +19,11 @@ let prevNumMoves = null;
 let moveStartTime = null;
 
 function speak(text) {
+  // This is meant to be set externally in the console
+  if (window["lvcMute"]) {
+    console.log(`Muted: ${text}`);
+    return;
+  }
   console.log(`Speaking: ${text}`);
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.voice = voice;
@@ -85,7 +90,7 @@ function tryInit() {
     return false;
   }
 
-  console.log("Lichess Countdown Timer is activated")
+  console.log("Lichess Countdown Timer is activated");
   new MutationObserver(() => {
     onTimeMutation(movesEl, timeEl.innerText);
   }).observe(timeEl, {childList: true});
