@@ -89,6 +89,12 @@ function tryInit() {
   if (!timeEl || !movesEl) {
     return false;
   }
+  if (!$(".rcontrols")) {
+    // Everything is initialized, but this page is just observing a game.
+    // Return true so we don't keep trying to initialize.
+    console.log("This page just observing, disabling countdown timer");
+    return true;
+  }
 
   console.log("Lichess Countdown Timer is activated");
   new MutationObserver(() => {
