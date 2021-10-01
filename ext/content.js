@@ -103,8 +103,24 @@ function tryInit() {
   return true;
 }
 
+function onKeyDown(event) {
+  if (event.target === document.body && event.key === "Enter") {
+    // NB: Lichess already has the space key for "Play best computer move". However:
+    // 1) The space key is meant for scrolling (and my smoothscroll extension will take
+    // precedence for that.
+    // 2) Sometimes the server evaluation doesn't agree with the client on what the best move is.
+    // Lichess's space key will use the server's move in that case, even though it uses the client's
+    // move for drawing its arrows. For consistency it's best to just always use the client's move,
+    // so we do that here.
+    const el = $(".pv_box .pv");
+    el.dispatchEvent(new MouseEvent("mousedown", {buttons: 1, bubbles: true}));
+  }
+}
+
 function main() {
   console.log("Lichess Countdown Timer is initializing");
+  document.body.addEventListener("keydown", onKeyDown);
+
   if (!tryInit()) {
     const observer = new MutationObserver(() => {
       if (tryInit()) {
