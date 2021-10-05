@@ -103,8 +103,16 @@ function tryInit() {
   return true;
 }
 
+function sendMouseEvent(el, eventName) {
+  console.log("clicking on:", el)
+  el.dispatchEvent(new MouseEvent(eventName, {buttons: 1, bubbles: true}));
+}
+
 function onKeyDown(event) {
-  if (event.target === document.body && event.key === "Enter") {
+  if (event.target !== document.body) {
+    return;
+  }
+  if (event.key === "Enter") {
     // NB: Lichess already has the space key for "Play best computer move". However:
     // 1) The space key is meant for scrolling (and my smoothscroll extension will take
     // precedence for that.
@@ -112,8 +120,12 @@ function onKeyDown(event) {
     // Lichess's space key will use the server's move in that case, even though it uses the client's
     // move for drawing its arrows. For consistency it's best to just always use the client's move,
     // so we do that here.
-    const el = $(".pv_box .pv");
-    el.dispatchEvent(new MouseEvent("mousedown", {buttons: 1, bubbles: true}));
+    sendMouseEvent($(".pv_box .pv"), "mousedown");
+    return;
+  }
+  if (event.key === "o") {
+    sendMouseEvent($(".friend_box_title"), "click");
+    return;
   }
 }
 
