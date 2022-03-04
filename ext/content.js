@@ -3,7 +3,7 @@ const isLichess = document.domain == "lichess.org";
 
 const OPTIONS = {
   alertTimes: [45, 30, 15, 10, 5, 2],
-  moveAlertInterval: 3,
+  moveAlertInterval: 30,
   synthVoiceName: "Alex",
   mp3VoiceName: "Eric",
   // If true, uses mp3 files instead of the SpeechSynthesis API.
@@ -73,7 +73,12 @@ function speak(text) {
 }
 
 function onTimeMutation(movesEl, timeStr) {
-  const match = timeStr.match(/(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/);
+  console.log(timeStr);
+  const match = timeStr.match(
+    isLichess ?
+      /(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/ :
+      /(\d\d?):(\d\d)$/
+  );
   if (!match) {
     console.log("Can't parse time:", timeStr);
     return;
@@ -110,22 +115,30 @@ function onTimeMutation(movesEl, timeStr) {
 }
 
 function tryInit() {
-  const timeEl = $(".rclock-bottom .time");
-  const movesEl = $("rm6"); // lichess uses a weird custom tag
+  const timeEl = isLichess ? $(".rclock-bottom .time") : $(".layout-bottom-player .move-time-content");
+  const movesEl = isLichess ? $("rm6") : $("vertical-move-list");
   if (!timeEl || !movesEl) {
     return false;
   }
-  if (!$(".rcontrols")) {
+  const playerControlsEl = isLichess ? $(".rcontrols") : $(".game-control-buttons-wrapper");
+  if (!playerControlsEl) {
     // Everything is initialized, but this page is just observing a game.
     // Return true so we don't keep trying to initialize.
     console.log("This page just observing, disabling countdown timer");
     return true;
   }
 
-  console.log("Lichess Countdown Timer is activated");
-  new MutationObserver(() => {
+  console.log("Countdown Timer is activated");
+  const timeObserver = new MutationObserver(() => {
     onTimeMutation(movesEl, timeEl.innerText);
   }).observe(timeEl, {childList: true});
+
+  // TODO: In chess.com, if you click Rematch, a new set of clock elements gets
+  // used, so we need to watch for that and reinitialize.
+  // const resetObserver =  new MutationObserver(() => {
+  //
+  // }).observe(timeEl.parentNode)
+
   return true;
 }
 
@@ -156,7 +169,7 @@ function onKeyDown(event) {
 }
 
 function main() {
-  console.log("Lichess Countdown Timer is initializing");
+  console.log("Chess Countdown Timer is initializing");
   document.body.addEventListener("keydown", onKeyDown);
 
   if (!tryInit()) {
