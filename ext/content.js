@@ -115,12 +115,24 @@ function onTimeMutation(movesEl, timeStr) {
 }
 
 function tryInit() {
-  const timeEl = isLichess ? $(".rclock-bottom .time") : $(".layout-bottom-player .move-time-content");
+  const timeEl = isLichess ?
+    $(".rclock-bottom .time") : (
+      // For games against humans
+      $('.clock-bottom [data-cy="clock-time"]') ||
+      // For games against computers
+      $(".layout-bottom-player .move-time-content")
+    );
   const movesEl = isLichess ? $("rm6") : $("vertical-move-list");
   if (!timeEl || !movesEl) {
     return false;
   }
-  const playerControlsEl = isLichess ? $(".rcontrols") : $(".game-control-buttons-wrapper");
+  const playerControlsEl = isLichess ?
+    $(".rcontrols") : (
+      // For games against humans
+      $(".live-game-buttons-component") ||
+      // For games against computers
+      $(".game-control-buttons-wrapper")
+    );
   if (!playerControlsEl) {
     // Everything is initialized, but this page is just observing a game.
     // Return true so we don't keep trying to initialize.
