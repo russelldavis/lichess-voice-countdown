@@ -1,0 +1,15 @@
+<html>
+<body>
+  Click anywhere to reproduce the crash (should only take a few seconds after clicking)
+  <script>
+    document.body.onclick = function () {
+      const audio = new Audio("./move.mp3");
+      let i = 0;
+      audio.addEventListener("ended", () => {
+        if (i++ < 100) audio.play();
+      });
+      audio.play();
+    };
+  </script>
+</body>
+</html>

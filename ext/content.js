@@ -1,9 +1,14 @@
 const $ = document.querySelector.bind(document);
+const isLichess = document.domain == "lichess.org";
 
 const OPTIONS = {
   alertTimes: [45, 30, 15, 10, 5, 2],
-  moveAlertInterval: 30,
-  voiceName: "Alex",
+  moveAlertInterval: 3,
+  synthVoiceName: "Alex",
+  mp3VoiceName: "Eric",
+  // If true, uses mp3 files instead of the SpeechSynthesis API.
+  // I added this due to crashes caused by the API: https://bugs.chromium.org/p/chromium/issues/detail?id=1301855#c2
+  useMp3s: true,
   // debug: true,
 }
 
@@ -12,11 +17,48 @@ if (OPTIONS.debug) {
   OPTIONS.moveAlertInterval = 3;
 }
 
-const voices = await getVoices();
-const voice = voices.find((voice) => voice.name === OPTIONS.voiceName);
+let voice = null;
+if (!OPTIONS.useMp3s) {
+  function getVoices() {
+    return new Promise((resolve, _reject) => {
+      const voices = speechSynthesis.getVoices();
+      if (voices.length !== 0) {
+        resolve(voices);
+      } else {
+        const listener = () => {
+          speechSynthesis.removeEventListener("voiceschanged", listener);
+          resolve(speechSynthesis.getVoices());
+        };
+        speechSynthesis.addEventListener("voiceschanged", listener);
+      }
+    });
+  }
+
+  const voices = await getVoices();
+  voice = voices.find((voice) => voice.name === OPTIONS.synthVoiceName);
+}
+
 let prevSeconds = null;
 let prevNumMoves = null;
 let moveStartTime = null;
+
+function speakSynth(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voice;
+  speechSynthesis.speak(utterance);
+}
+
+function speakMp3(text) {
+  window.postMessage(
+    {
+      src: "lichess-voice-countdown",
+      command: "speakMp3",
+      voiceName: OPTIONS.mp3VoiceName,
+      text
+    },
+    "*"
+  );
+}
 
 function speak(text) {
   // This is meant to be set externally in the console
@@ -25,26 +67,10 @@ function speak(text) {
     return;
   }
   console.log(`Speaking: ${text}`);
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voice;
-  speechSynthesis.speak(utterance);
+  OPTIONS.useMp3s ?
+    speakMp3(text) :
+    speakSynth(text);
 }
-
-function getVoices() {
-  return new Promise((resolve, _reject) => {
-    const voices = speechSynthesis.getVoices();
-    if (voices.length !== 0) {
-      resolve(voices);
-    } else {
-      const listener = () => {
-        speechSynthesis.removeEventListener("voiceschanged", listener);
-        resolve(speechSynthesis.getVoices());
-      };
-      speechSynthesis.addEventListener("voiceschanged", listener);
-    }
-  });
-}
-
 
 function onTimeMutation(movesEl, timeStr) {
   const match = timeStr.match(/(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/);
