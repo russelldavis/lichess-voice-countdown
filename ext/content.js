@@ -102,7 +102,7 @@ function onTimeMutation(movesEl, timeStr) {
     return;
   }
 
-  const numMoves = movesEl.querySelectorAll("u8t").length
+  const numMoves = movesEl.querySelectorAll(isLichess ? "u8t" : ".move").length;
   if (numMoves !== prevNumMoves) {
     prevNumMoves = numMoves;
     // + 1 because the move started a second ago, beore the clock changed
