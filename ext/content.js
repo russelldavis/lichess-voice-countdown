@@ -77,7 +77,7 @@ function onTimeMutation(movesEl, timeStr) {
   const match = timeStr.match(
     isLichess ?
       /(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/ :
-      /(\d\d?):(\d\d)$/
+      /(\d\d?):(\d\d)(\.\d+)?$/
   );
   if (!match) {
     console.log("Can't parse time:", timeStr);
@@ -104,8 +104,9 @@ function onTimeMutation(movesEl, timeStr) {
 
   const numMoves = movesEl.querySelectorAll(isLichess ? "u8t" : ".move").length;
   if (numMoves !== prevNumMoves) {
+    console.log("restarting move clock");
     prevNumMoves = numMoves;
-    // + 1 because the move started a second ago, beore the clock changed
+    // + 1 because the move started a second ago, before the clock changed
     moveStartTime = seconds + 1;
   }
 
