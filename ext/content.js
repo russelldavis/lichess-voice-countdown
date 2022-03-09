@@ -92,8 +92,11 @@ function onTimeMutation(movesEl, timeStr) {
     prevSeconds = seconds;
     return;
   }
-  if (seconds === prevSeconds) {
-    // The clock was re-rendered w/ no change, or the milliseconds changed but not the rest.
+  if (seconds >= prevSeconds) {
+    // When equal: The clock was re-rendered w/ no change, or the milliseconds changed but not the rest.
+    // When greater: We just finished a move and the increment time was added.
+    // Either way, just ignore.
+    console.log("Ignoring time change >= previous time");
     return;
   }
   prevSeconds = seconds;
@@ -104,12 +107,13 @@ function onTimeMutation(movesEl, timeStr) {
 
   const numMoves = movesEl.querySelectorAll(isLichess ? "u8t" : ".move").length;
   if (numMoves !== prevNumMoves) {
-    console.log("restarting move clock");
+    // console.log("Restarting move clock at: ", seconds);
     prevNumMoves = numMoves;
     // + 1 because the move started a second ago, before the clock changed
     moveStartTime = seconds + 1;
   }
 
+  //console.log("Move timer: ", (moveStartTime - seconds))
   if ((moveStartTime - seconds) % OPTIONS.moveAlertInterval === 0) {
     speak("move!");
   }
