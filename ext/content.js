@@ -73,7 +73,6 @@ function speak(text) {
 }
 
 function onTimeMutation(movesEl, timeStr) {
-  console.log(timeStr);
   const match = timeStr.match(
     isLichess ?
       /(\d\d)\s*[^\d]\s*(\d\d)\s*([^\d]\d*)?$/ :
@@ -96,10 +95,14 @@ function onTimeMutation(movesEl, timeStr) {
     // When equal: The clock was re-rendered w/ no change, or the milliseconds changed but not the rest.
     // When greater: We just finished a move and the increment time was added.
     // Either way, just ignore.
-    console.log("Ignoring time change >= previous time");
+    // console.log("Ignoring time change >= previous time");
+    // Important to set prevSeconds for the case when we've just added the increment, so that we only
+    // ignore the uptick, not every downtick back to the pre-increment time.
+    prevSeconds = seconds;
     return;
   }
   prevSeconds = seconds;
+  // console.log(seconds);
   if (OPTIONS.alertTimes.includes(seconds)) {
     speak(`${seconds}`);
     return;
