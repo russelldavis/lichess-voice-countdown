@@ -186,11 +186,18 @@ function onKeyDown(event) {
     sendMouseEvent($(".friend_box_title"), "click");
     return;
   }
+  if (event.key === "/") {
+    // The default behavior causes the searchbox to get the focus, which is almost always a fatfingered key
+    // which then causes future keystrokes to be typed into the searchbox instead of being processed here.
+    // I never use this anyway, so just disable it.
+    event.preventDefault();
+    return;
+  }
 }
 
 function main() {
   console.log("Chess Countdown Timer is initializing");
-  document.body.addEventListener("keydown", onKeyDown);
+  document.body.addEventListener("keydown", onKeyDown, true);
 
   if (!tryInit()) {
     const observer = new MutationObserver(() => {
