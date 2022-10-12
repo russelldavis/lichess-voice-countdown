@@ -2,7 +2,7 @@ const $ = document.querySelector.bind(document);
 const isLichess = document.domain == "lichess.org";
 
 const OPTIONS = {
-  alertTimes: [45, 30, 15, 10, 5, 2],
+  alertTimes: [45, 30, 15, 12, 7, 4],
   moveAlertInterval: 30,
   synthVoiceName: "Alex",
   mp3VoiceName: "Eric",
@@ -104,7 +104,9 @@ function onTimeMutation(movesEl, timeStr) {
   prevSeconds = seconds;
   // console.log(seconds);
   if (OPTIONS.alertTimes.includes(seconds)) {
-    speak(`${seconds}`);
+    // Subtract 2 at end of game to trick me into not flagging.
+    const speakSeconds = seconds > 12 ? seconds : seconds - 2;
+    speak(`${speakSeconds}`);
     return;
   }
 
