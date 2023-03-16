@@ -110,7 +110,7 @@ function onTimeMutation(movesEl, timeStr) {
     return;
   }
 
-  const numMoves = movesEl.querySelectorAll(isLichess ? "u8t" : ".move").length;
+  const numMoves = movesEl.querySelectorAll(isLichess ? "i5z" : ".move").length;
   if (numMoves !== prevNumMoves) {
     // console.log("Restarting move clock at: ", seconds);
     prevNumMoves = numMoves;
